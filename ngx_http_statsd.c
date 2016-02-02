@@ -430,8 +430,8 @@ static ngx_int_t ngx_http_statsd_udp_send(ngx_udp_endpoint_t *l, u_char *buf, si
         uc->log.data = NULL;
         uc->log.action = "logging";
 
-        if (ngx_udp_connect(uc) != NGX_OK) {
-            if (uc->connection != NULL) {
+        if(ngx_udp_connect(uc) != NGX_OK) {
+            if(uc->connection != NULL) {
                 ngx_free_connection(uc->connection);
                 uc->connection = NULL;
             }

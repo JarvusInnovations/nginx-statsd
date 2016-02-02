@@ -15,16 +15,16 @@
 
 #define STATSD_DEFAULT_PORT 8125
 
-#define STATSD_TYPE_COUNTER 0x0001
+#define STATSD_TYPE_COUNTER	0x0001
 #define STATSD_TYPE_TIMING  0x0002
 #define STATSD_TYPE_SET     0x0003
 
 #define STATSD_MAX_STR 1432
 
-#define ngx_conf_merge_ptr_value(conf, prev, default)         \
-  if (conf == NGX_CONF_UNSET_PTR) {                           \
-    conf = (prev == NGX_CONF_UNSET_PTR) ? default : prev; \
-  }
+#define ngx_conf_merge_ptr_value(conf, prev, default)            		\
+ 	if (conf == NGX_CONF_UNSET_PTR) {                               	\
+        conf = (prev == NGX_CONF_UNSET_PTR) ? default : prev;           \
+	}
 
 #if defined nginx_version && nginx_version >= 8021
 typedef ngx_addr_t ngx_statsd_addr_t;
@@ -233,8 +233,8 @@ static ngx_uint_t ngx_http_statsd_metric_value(ngx_str_t *value) {
     ngx_int_t n, m;
 
     if (value->len == 1 && value->data[0] == '-') {
-    	return (ngx_uint_t) -1;
-	};
+        return (ngx_uint_t) - 1;
+    };
 
     /*
      * Hack to convert a float into an integer.
@@ -275,15 +275,16 @@ static ngx_flag_t ngx_http_statsd_valid_value(ngx_str_t *value) {
     return (ngx_flag_t)(value->len > 0 ? 1 : 0);
 };
 
-ngx_int_t ngx_http_statsd_handler(ngx_http_request_t *r) {
-    u_char line[STATSD_MAX_STR], *p;
+ngx_int_t
+ngx_http_statsd_handler(ngx_http_request_t *r) {
+    u_char startline[STATSD_MAX_STR], *p, *line;
+    size_t togo;
     const char *metric_type;
     ngx_http_statsd_conf_t *ulcf;
     ngx_statsd_stat_t *stats;
     ngx_statsd_stat_t stat;
     ngx_uint_t c;
     ngx_uint_t n;
-    ngx_str_t set;
     ngx_str_t s;
     ngx_flag_t b;
 
@@ -292,7 +293,7 @@ ngx_int_t ngx_http_statsd_handler(ngx_http_request_t *r) {
     ulcf = ngx_http_get_module_loc_conf(r, ngx_http_statsd_module);
 
     if (ulcf->off == 1 || ulcf->endpoint == NULL) {
-		ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "statsd: handler off");
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "statsd: handler off");
         return NGX_OK;
     }
 
@@ -429,8 +430,8 @@ static ngx_int_t ngx_http_statsd_udp_send(ngx_udp_endpoint_t *l, u_char *buf, si
         uc->log.data = NULL;
         uc->log.action = "logging";
 
-        if(ngx_udp_connect(uc) != NGX_OK) {
-            if(uc->connection != NULL) {
+        if (ngx_udp_connect(uc) != NGX_OK) {
+            if (uc->connection != NULL) {
                 ngx_free_connection(uc->connection);
                 uc->connection = NULL;
             }
@@ -697,7 +698,7 @@ static char *ngx_http_statsd_add_stat(ngx_conf_t *cf, ngx_command_t *cmd, void *
 		}
 	}
 
-	return NGX_CONF_OK;
+    return NGX_CONF_OK;
 }
 
 static char *ngx_http_statsd_add_count(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
@@ -745,18 +746,25 @@ static ngx_int_t ngx_http_statsd_init(ngx_conf_t *cf) {
     return NGX_OK;
 }
 
-uintptr_t ngx_escape_statsd_key(u_char *dst, u_char *src, size_t size) {
+uintptr_t
+ngx_escape_statsd_key(u_char *dst, u_char *src, size_t size) {
     ngx_uint_t n;
     uint32_t *escape;
+
     /* " ", "#", """, "%", "'", %00-%1F, %7F-%FF */
+
     static uint32_t statsd_key[] = {
             0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+
             /* ?>=< ;:98 7654 3210  /.-, +*)( '&%$ #"!  */
             0xfc00bfff, /* 1111 1100 0000 0000  1011 1111 1111 1111 */
+
             /* _^]\ [ZYX WVUT SRQP  ONML KJIH GFED CBA@ */
             0x78000001, /* 0111 1000 0000 0000  0000 0000 0000 0001 */
+
             /*  ~}| {zyx wvut srqp  onml kjih gfed cba` */
             0xf8000001, /* 1111 1000 0000 0000  0000 0000 0000 0001 */
+
             0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
             0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
             0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
@@ -769,6 +777,7 @@ uintptr_t ngx_escape_statsd_key(u_char *dst, u_char *src, size_t size) {
 
     if (dst == NULL) {
         /* find the number of the characters to be escaped */
+
         n = 0;
 
         while (size) {
